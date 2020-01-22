@@ -6,15 +6,12 @@ import csv
 import requests
 
 class People(object):
-
     def __init__(self, name = "", place_of_birth = "", year_of_graduation = ""):
         self.name = name
         self.place_of_birth = place_of_birth
         self.year_of_graduation = year_of_graduation
-
-
+        
 class Ballotpedia(object):
-
     def __init__(self, driver, urls):
         self.driver = driver
         self.urls = urls
