@@ -46,15 +46,11 @@ def main():
     population = population_json['CFMetaData']['measuresAndLinks']['measure']['value']
     age = age_json['CFMetaData']['measuresAndLinks']['measure']['value']
     business = business_json['CFMetaData']['measuresAndLinks']['measure']['value']
-
-    information = pd.DataFrame({
-        'Geo': geo,
-        'Population': population,
-        'Age': age,
-        'Business': business,
-    })
-
-    print(information)
+    
+    print(geo)
+    print(population)
+    print(age)
+    print(business)
 
 if __name__ == '__main__':
     main()
