@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from bs4 import BeautifulSoup
 import pandas as pd
+import csv
 import requests
 
 class People(object):
@@ -11,8 +12,6 @@ class People(object):
         self.place_of_birth = place_of_birth
         self.year_of_graduation = year_of_graduation
 
-    def __str__(self):
-        return f"Name: {self.name}; Place Of Birth: {self.place_of_birth}; Year of Graduation: {self.year_of_graduation}"
 
 class Ballotpedia(object):
 
@@ -48,51 +47,81 @@ class Ballotpedia(object):
     def people_scraping(self):
         people = People()
 
+        name = []
+        place = []
+        year = []
+
+        counter = 0
+
         for i in self.urls:
-            self.driver.get(i['href'])
+            if counter < 10:
+                self.driver.get(i['href'])
 
-            page = requests.get(i['href'])
-            soup = BeautifulSoup(page.content, 'html.parser')
+                page = requests.get(i['href'])
+                soup = BeautifulSoup(page.content, 'html.parser')
 
-            try:
-                people_name = self.driver.find_element_by_xpath("//h1[@id = 'firstHeading']//span").text
-                people.name = people_name
-            except NoSuchElementException:
-                people.name = "NONE"
+                try:
+                    people_name = self.driver.find_element_by_xpath("//h1[@id = 'firstHeading']//span").text
+                    people.name = people_name
+                    name.append(people.name)
 
-            widget_row = soup.find_all(class_ = "widget-row")
+                except NoSuchElementException:
+                    people.name = "NONE"
+                    name.append(people.name)
 
-            if widget_row[-1].find(class_ = 'widget-key'):
-                if widget_row[-1].find(class_ = 'widget-key').text == "Birthplace":
-                    people_place_of_birth = widget_row[-1].find(class_="widget-value").text
-                    people.place_of_birth = people_place_of_birth
+                widget_row = soup.find_all(class_="widget-row")
+
+                if widget_row[-1].find(class_='widget-key'):
+                    if widget_row[-1].find(class_='widget-key').text == "Birthplace":
+                        people_place_of_birth = widget_row[-1].find(class_="widget-value").text
+                        people.place_of_birth = people_place_of_birth
+                        place.append(people.place_of_birth)
+
+                    else:
+                        people.place_of_birth = "NONE"
+                        place.append(people.place_of_birth)
+
+                elif widget_row[-1].find('a'):
+                    if widget_row[-3].find(class_='widget-key').text == "Birthplace":
+                        people_place_of_birth = widget_row[-3].find(class_="widget-value").text
+                        people.place_of_birth = people_place_of_birth
+                        place.append(people.place_of_birth)
+
+                    else:
+                        people.place_of_birth = "NONE"
+                        place.append(people.place_of_birth)
 
                 else:
                     people.place_of_birth = "NONE"
+                    place.append(people.place_of_birth)
 
-            elif widget_row[-1].find('a'):
-                if widget_row[-3].find(class_ = 'widget-key').text == "Birthplace":
-                    people_place_of_birth = widget_row[-3].find(class_ = "widget-value").text
-                    people.place_of_birth = people_place_of_birth
-                else:
-                    people.place_of_birth = "NONE"
+                for widget in widget_row:
+                    if widget.find(class_="widget-key") in widget:
+                        widget_key = widget.find(class_="widget-key").text
 
+                        if widget_key == "Bachelor's":
+                            year_of_graduation = widget.find(class_="widget-value").text
+                            people.year_of_graduation = year_of_graduation.split()[-1]
+                            year.append(people.year_of_graduation)
+
+                            if people.year_of_graduation.isalpha():
+                                people.year_of_graduation = "NONE"
+                                year.append(people.year_of_graduation)
+                            break
             else:
-                people.place_of_birth = "NONE"
+                break
 
-            for widget in widget_row:
-                if widget.find(class_ = "widget-key") in widget:
-                    widget_key = widget.find(class_ = "widget-key").text
+                print(people)
 
-                    if widget_key == "Bachelor's":
-                        year_of_graduation = widget.find(class_ = "widget-value").text
-                        people.year_of_graduation = year_of_graduation.split()[-1]
+            counter = counter + 1
 
-                        if people.year_of_graduation.isalpha():
-                            people.year_of_graduation = "NONE"
-                        break
+        data = pd.DataFrame({
+            'NAME': name,
+            'BIRTHPLACE': place,
+            'YEAR OF GRADUATION': year,
+        })
 
-            print(people)
+        data.to_csv('file.csv')
 
 def main():
     driver = webdriver.Chrome()
