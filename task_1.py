@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-import csv
 
 headers = {
     'Accept': 'application/json, text/plain, */*',
