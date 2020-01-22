@@ -57,7 +57,6 @@ class Ballotpedia(object):
             try:
                 people_name = self.driver.find_element_by_xpath("//h1[@id = 'firstHeading']//span").text
                 people.name = people_name
-                #print("Name:", people.name)
             except NoSuchElementException:
                 people.name = "NONE"
 
@@ -67,24 +66,19 @@ class Ballotpedia(object):
                 if widget_row[-1].find(class_ = 'widget-key').text == "Birthplace":
                     people_place_of_birth = widget_row[-1].find(class_="widget-value").text
                     people.place_of_birth = people_place_of_birth
-                    #print("Birthplace:", people.place_of_birth)
 
                 else:
                     people.place_of_birth = "NONE"
-                    #print("Birthplace:", people.place_of_birth)
 
             elif widget_row[-1].find('a'):
                 if widget_row[-3].find(class_ = 'widget-key').text == "Birthplace":
                     people_place_of_birth = widget_row[-3].find(class_ = "widget-value").text
                     people.place_of_birth = people_place_of_birth
-                    #print("Birthplace:", people.place_of_birth)
                 else:
                     people.place_of_birth = "NONE"
-                    #print("Birthplace:", people.place_of_birth)
 
             else:
                 people.place_of_birth = "NONE"
-                #print("Birthplace: ", people.place_of_birth)
 
             for widget in widget_row:
                 if widget.find(class_ = "widget-key") in widget:
