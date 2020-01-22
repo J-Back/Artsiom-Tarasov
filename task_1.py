@@ -1,4 +1,6 @@
 import requests
+import pandas as pd
+import csv
 
 headers = {
     'Accept': 'application/json, text/plain, */*',
@@ -38,19 +40,28 @@ def main():
     response_age = requests.post("https://factfinder.census.gov/rest/communityFactsNav/nav", headers = headers, data = data_age)
     response_business = requests.post("https://factfinder.census.gov/rest/communityFactsNav/nav", headers = headers, data = data_business)
 
+    geo = []
+    population = []
+    age = []
+    business = []
+
     population_json = response_population.json()
     age_json = response_age.json()
     business_json = response_business.json()
 
-    geo = population_json['CFMetaData']['geo']
-    population = population_json['CFMetaData']['measuresAndLinks']['measure']['value']
-    age = age_json['CFMetaData']['measuresAndLinks']['measure']['value']
-    business = business_json['CFMetaData']['measuresAndLinks']['measure']['value']
-    
-    print(geo)
-    print(population)
-    print(age)
-    print(business)
+    geo.append(population_json['CFMetaData']['geo'])
+    population.append(population_json['CFMetaData']['measuresAndLinks']['measure']['value'])
+    age.append(age_json['CFMetaData']['measuresAndLinks']['measure']['value'])
+    business.append(business_json['CFMetaData']['measuresAndLinks']['measure']['value'])
+
+    data = pd.DataFrame({
+        'GEO': geo,
+        'POPULATION': population,
+        'AGE': age,
+        'BUSINESS': business
+    })
+
+    data.to_csv('file.csv')
 
 if __name__ == '__main__':
     main()
